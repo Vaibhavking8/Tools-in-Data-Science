@@ -23,6 +23,7 @@ async def latency_metrics(request: Request):
     regions = body.get("regions", [])
     threshold = body.get("threshold_ms", 180)
 
+    results = {}
     for region in regions:
         region_data = [r for r in telemetry if r["region"] == region]
         if not region_data:
