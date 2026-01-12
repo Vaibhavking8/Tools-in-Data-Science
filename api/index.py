@@ -9,7 +9,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
@@ -45,3 +45,7 @@ async def latency_metrics(request: Request):
     #     }
 
     return results
+
+@app.get("/")
+def hello():
+    return {"message": "Hello, World!"}
