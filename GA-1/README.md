@@ -520,9 +520,7 @@ git log
 
 ## 33) Author a Deployment Architecture Markdown
 
-```markdown
-<full architecture markdown exactly as provided>
-```
+> arch.md
 
 ---
 
