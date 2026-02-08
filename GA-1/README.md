@@ -532,8 +532,44 @@ git log
 
 ## 35) LLM Sentiment Analysis
 
+Replace YOUR_API_TOKEN with your aipipe token
+
 ```python
-<full Python code exactly as provided>
+import httpx
+
+def analyze_sentiment():
+    url = "https://aipipe.org/openai/v1/chat/completions"
+    headers = {
+        "Authorization": "Bearer YOUR_API_TOKEN",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a sentiment analysis model. Analyze the given text and classify it strictly as GOOD, BAD, or NEUTRAL."
+            },
+            {
+                "role": "user",
+                "content": "lJlcVg  bU zUZ mHMHIjDtBDH 99t dek 1Pf7O o M\nCxBf3"
+            }
+        ]
+    }
+
+    # Send the POST request
+    response = httpx.post(url, json=data, headers=headers)
+
+    # Raise exception if status code is not 2xx
+    response.raise_for_status()
+
+    # Parse and print JSON response
+    result = response.json()
+    print(result)
+
+if __name__ == "__main__":
+    analyze_sentiment()
 ```
 
 ---
