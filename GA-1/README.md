@@ -433,6 +433,14 @@ h3s52rpguc
 
 ## 21) CSS: Featured-Sale Discount Sum
 
+Go to Inspect then type in console :
+```shell
+const ele = document.querySelectorAll('.featured.sale');
+let sum = 0;
+ele.forEach(p=>sum+parseFloat(p.dataset.discount));
+sum
+```
+Output:
 ```
 234
 ```
