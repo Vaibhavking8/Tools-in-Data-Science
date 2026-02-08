@@ -576,6 +576,12 @@ if __name__ == "__main__":
 
 ## 36) Compare Files
 
+On wsl type:
+```wsl
+paste a.txt b.txt | awk -F'\t' '$1 != $2 {count++} END {print count}'
+```
+
+OUTPUT:
 ```
 39
 ```
