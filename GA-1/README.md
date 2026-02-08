@@ -437,7 +437,7 @@ Go to Inspect then type in console :
 ```shell
 const ele = document.querySelectorAll('.featured.sale');
 let sum = 0;
-ele.forEach(p=>sum+parseFloat(p.dataset.discount));
+ele.forEach(p=>sum+=parseFloat(p.dataset.discount));
 sum
 ```
 Output:
@@ -449,26 +449,67 @@ Output:
 
 ## 22) Simple Question
 
+Inspect the element, you will some chinese text. Just translate it.
 ```bash
 git log
 ```
 
 ---
 
-## 23) Optimize AI System Costs
+## 23) Use GitHub
+
+---
+
+## 24) Build an AI-Powered Data Pipeline
+
+(Bypassed)
+
+---
+
+## 25) Optimize AI System Costs
 
 ```json
-<full optimization JSON exactly as provided>
+{
+  "model": "gpt-4o-mini",
+  "monthlyCost": 750.50,
+  "strategies": [
+    "Cache responses for identical content (estimated 40% cache hit rate)",
+    "Batch requests every 5 seconds (reduce API overhead by ~15%)",
+    "Compress prompts by removing examples (save ~30% input tokens per request)"
+  ],
+  "justification": "Chose gpt-4o-mini because it meets 87% quality (>80% req) at lowest baseline ~$50/mo vs llama-3-70b (~$175) or haiku (~$275), balancing cost-quality for moderation. Baseline: 502k req/mo, 161M input/37M output tokens = $49.64. Post-opts: caching cuts 40% load (-$19.86), compression saves 30% input (-$7.74), batching -15% (-$3.18), final est ~$21 (well under $949; $750.50 conservative w/buffer)."
+}
 ```
 
 ---
 
-## 24–31)
-
-(Not applicable)
+## 26) Optimize AI System with Caching Strategies
 
 ---
 
+## 27) Validate and Sanitize AI System Inputs/Outputs
+
+---
+
+## 28) Implement Streaming LLM Response Handler 
+
+---
+
+## 29) Refactor JSON for Compression
+
+> refractor.json
+
+---
+
+## 30) Fix Broken JSON File
+
+> fixed.json
+
+---
+
+## 31) Compress an image
+
+---
 ## 32) Process Files with Different Encodings
 
 ```
