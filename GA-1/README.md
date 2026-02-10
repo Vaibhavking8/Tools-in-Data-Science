@@ -526,7 +526,182 @@ git log
 
 ## 34)
 
-(Not applicable)
+```
+function convertToMarkdown(text) {
+  // Character mappings for Unicode formatting
+  const BOLD_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const ITALIC_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const MONO_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const NORMAL_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+  // Unicode ranges
+  const BOLD_RANGE = '𝐀-𝐙𝐚-𝐳𝟎-𝟗';
+  const ITALIC_RANGE = '𝐴-𝑍𝑎-𝑧';
+  const MONO_RANGE = '𝙰-𝚉𝚊-𝚣𝟶-𝟿';
+  const BULLETS = ['•', '◦', '▪', '▸', '‣'];
+  
+  // Helper function to map characters
+  function mapChars(text, fromChars, toChars) {
+    return text.split('').map(char => {
+      const idx = fromChars.indexOf(char);
+      return idx !== -1 ? toChars[idx] : char;
+    }).join('');
+  }
+  
+  // Helper to detect if a character is in a Unicode range
+  function isInRange(char, rangeStart, rangeEnd) {
+    const code = char.codePointAt(0);
+    const start = rangeStart.codePointAt(0);
+    const end = rangeEnd.codePointAt(0);
+    return code >= start && code <= end;
+  }
+  
+  // Build character maps
+  const boldMap = new Map();
+  const italicMap = new Map();
+  const monoMap = new Map();
+  
+  // Bold mappings (𝐀-𝐙 → A-Z, 𝐚-𝐳 → a-z, 𝟎-𝟗 → 0-9)
+  for (let i = 0; i < 26; i++) {
+    boldMap.set(String.fromCodePoint(0x1D400 + i), String.fromCharCode(65 + i)); // A-Z
+    boldMap.set(String.fromCodePoint(0x1D41A + i), String.fromCharCode(97 + i)); // a-z
+  }
+  for (let i = 0; i < 10; i++) {
+    boldMap.set(String.fromCodePoint(0x1D7CE + i), String.fromCharCode(48 + i)); // 0-9
+  }
+  
+  // Italic mappings (𝐴-𝑍 → A-Z, 𝑎-𝑧 → a-z)
+  for (let i = 0; i < 26; i++) {
+    italicMap.set(String.fromCodePoint(0x1D434 + i), String.fromCharCode(65 + i)); // A-Z
+    italicMap.set(String.fromCodePoint(0x1D44E + i), String.fromCharCode(97 + i)); // a-z
+  }
+  
+  // Monospace mappings (𝙰-𝚉 → A-Z, 𝚊-𝚣 → a-z, 𝟶-𝟿 → 0-9)
+  for (let i = 0; i < 26; i++) {
+    monoMap.set(String.fromCodePoint(0x1D670 + i), String.fromCharCode(65 + i)); // A-Z
+    monoMap.set(String.fromCodePoint(0x1D68A + i), String.fromCharCode(97 + i)); // a-z
+  }
+  for (let i = 0; i < 10; i++) {
+    monoMap.set(String.fromCodePoint(0x1D7F6 + i), String.fromCharCode(48 + i)); // 0-9
+  }
+  
+  let result = text;
+  
+  // Convert bullets
+  BULLETS.forEach(bullet => {
+    result = result.replace(new RegExp(bullet, 'g'), '-');
+  });
+  
+  // Split into lines for multi-line code detection
+  let lines = result.split('\n');
+  let processedLines = [];
+  let i = 0;
+  
+  while (i < lines.length) {
+    let line = lines[i];
+    
+    // Check if this line and next 2+ lines are all monospace
+    let monoLineCount = 0;
+    let j = i;
+    while (j < lines.length && hasMonospace(lines[j])) {
+      monoLineCount++;
+      j++;
+    }
+    
+    if (monoLineCount >= 3) {
+      // Multi-line code block
+      processedLines.push('```');
+      for (let k = i; k < i + monoLineCount; k++) {
+        processedLines.push(convertMonospace(lines[k]));
+      }
+      processedLines.push('```');
+      i += monoLineCount;
+    } else {
+      // Process line normally
+      processedLines.push(processLine(line));
+      i++;
+    }
+  }
+  
+  result = processedLines.join('\n');
+  
+  return result;
+  
+  // Helper functions
+  function hasMonospace(line) {
+    return Array.from(line).some(char => monoMap.has(char));
+  }
+  
+  function convertMonospace(text) {
+    return Array.from(text).map(char => monoMap.get(char) || char).join('');
+  }
+  
+  function processLine(line) {
+    let processed = line;
+    
+    // Convert bold sequences
+    processed = convertFormatting(processed, boldMap, '**');
+    
+    // Convert italic sequences
+    processed = convertFormatting(processed, italicMap, '*');
+    
+    // Convert inline monospace
+    processed = convertInlineMonospace(processed);
+    
+    return processed;
+  }
+  
+  function convertFormatting(text, charMap, wrapper) {
+    let result = '';
+    let i = 0;
+    let chars = Array.from(text);
+    
+    while (i < chars.length) {
+      if (charMap.has(chars[i])) {
+        // Found start of formatted sequence
+        let sequence = '';
+        let j = i;
+        while (j < chars.length && charMap.has(chars[j])) {
+          sequence += charMap.get(chars[j]);
+          j++;
+        }
+        result += wrapper + sequence + wrapper;
+        i = j;
+      } else {
+        result += chars[i];
+        i++;
+      }
+    }
+    
+    return result;
+  }
+  
+  function convertInlineMonospace(text) {
+    let result = '';
+    let i = 0;
+    let chars = Array.from(text);
+    
+    while (i < chars.length) {
+      if (monoMap.has(chars[i])) {
+        // Found start of monospace sequence
+        let sequence = '';
+        let j = i;
+        while (j < chars.length && monoMap.has(chars[j])) {
+          sequence += monoMap.get(chars[j]);
+          j++;
+        }
+        result += '`' + sequence + '`';
+        i = j;
+      } else {
+        result += chars[i];
+        i++;
+      }
+    }
+    
+    return result;
+  }
+}
+```
 
 ---
 
