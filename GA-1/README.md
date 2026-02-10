@@ -497,7 +497,7 @@ git log
 
 ## 29) Refactor JSON for Compression
 
-> refractor.json
+> refactor.json
 
 ---
 
