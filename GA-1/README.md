@@ -524,9 +524,9 @@ git log
 
 ---
 
-## 34)
+## 34) Convert Unicode Formatting to Markdown
 
-```
+```js
 function convertToMarkdown(text) {
   // Character mappings for Unicode formatting
   const BOLD_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
