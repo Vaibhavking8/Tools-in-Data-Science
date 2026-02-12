@@ -449,7 +449,7 @@ Output:
 
 ## 22) Simple Question
 
-Inspect the element, you will some chinese text. Just translate it.
+Inspect the element, there is a div tag with class="comment", expand it and you will see some chinese text. Just translate it.
 ```bash
 git log
 ```
@@ -484,14 +484,17 @@ git log
 ---
 
 ## 26) Optimize AI System with Caching Strategies
+(Bypassed)
 
 ---
 
 ## 27) Validate and Sanitize AI System Inputs/Outputs
+(Bypassed)
 
 ---
 
 ## 28) Implement Streaming LLM Response Handler 
+(Bypassed)
 
 ---
 
@@ -508,6 +511,7 @@ git log
 ---
 
 ## 31) Compress an image
+(Bypassed)
 
 ---
 ## 32) Process Files with Different Encodings
