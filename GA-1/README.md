@@ -450,6 +450,8 @@ Output:
 ## 22) Simple Question
 
 Inspect the element, there is a div tag with class="comment", expand it and you will see some chinese text. Just translate it.
+<img width="697" height="248" alt="image" src="https://github.com/user-attachments/assets/bbd9c887-e45d-4a15-ac9f-8975c5c8a8ab" />
+
 ```bash
 git log
 ```
