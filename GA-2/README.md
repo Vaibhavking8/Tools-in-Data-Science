@@ -3,6 +3,47 @@
 This README contains the **full, question-wise solutions for all 20 problems** from **Graded Assignment 2** of the *Tools in Data Science* course.
 
 ---
+## 1) Compress an image
+
+Working on wsl
+
+## 1️⃣ Install WebP Tools
+
+```bash
+sudo apt update
+sudo apt install webp imagemagick
+```
+
+Verify installation:
+
+```bash
+cwebp -version
+dwebp -version
+```
+
+---
+
+## 2️⃣ Convert PNG → Lossless WebP
+
+Use maximum lossless compression:
+
+```bash
+cwebp -lossless -z 9 -m 6 download.png -o final.webp
+```
+
+### 🔍 Flags Explained
+
+* `-lossless` → ensures pixel-perfect output
+* `-z 9` → highest compression level
+* `-m 6` → slowest method, smallest file size
+
+### ✅ Submission
+
+Submit:
+
+* `final.webp` (losslessly compressed, < 400 bytes)
+
+---
 
 ## 3) Git Time Travel: History Investigation
 
