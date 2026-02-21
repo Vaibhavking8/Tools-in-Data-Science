@@ -100,7 +100,7 @@ app.add_middleware(
 )
 ```
 
-Check out the full solution in api/index.py
+Check out the full solution in `api/index.py`
 
 ---
 
