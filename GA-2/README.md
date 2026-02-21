@@ -84,6 +84,12 @@ Outputs the 7-character short hash of the parent commit.
 
 ---
 
+## 12) Host a file on GitHub Gist
+
+Directly add your email in the description.
+
+---
+
 ## 14) Deploy a POST analytics endpoint to Vercel
 
 Add this to resolve CORS issue.
