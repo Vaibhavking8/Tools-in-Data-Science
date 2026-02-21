@@ -6,6 +6,23 @@ This README contains the **full, question-wise solutions for all 18 problems** f
 
 ## 14) Sum table values with Playwright
 
+### Setup
+```bash
+npm init -y
+npm install playwright
+npx playwright install
+```
+### Usage
+
+update the `const seeds = [84,85,86,87,88,89,90,91,92,93];` with your own seed values.
+  
+Then run:
+```
+node sum_tables.js
+```
+  
+   **OR**  
+    
 You can sum it manually by going to the website and then enter the following command in console.
 
 ```
