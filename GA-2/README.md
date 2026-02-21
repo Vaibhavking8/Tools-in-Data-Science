@@ -84,6 +84,26 @@ Outputs the 7-character short hash of the parent commit.
 
 ---
 
+## 14) Deploy a POST analytics endpoint to Vercel
+
+Add this to resolve CORS issue.
+
+```python
+# Enable CORS for POST from any origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
+```
+
+Check out the full solution in api/index.py
+
+---
+
 ## Final Note
 
 This README is a **complete, question-wise, single-file submission** of all 20 problems and their corresponding commands, code, and outputs, exactly as required.
