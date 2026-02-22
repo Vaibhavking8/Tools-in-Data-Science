@@ -84,6 +84,80 @@ Outputs the 7-character short hash of the parent commit.
 
 ---
 
+## 10) Publish a Docker Space with environment guardrails
+
+Go to [Hugging Face](https://huggingface.co/spaces)
+
+1) Create Space: ga2-yourid, Docker SDK, Public, CPU Basic
+
+Replace yourid and yourport as given in the problem.
+
+2) Upload all 4 files below via Files → Add file → Create new file
+
+### README.md
+
+```markdown
+---
+sdk: docker
+app_port: yourport
+title: ga2-yourid
+description: deployment-ready-ga2-yourid
+---
+
+# GA2 Docker Space
+Deployment-ready observability API.
+```
+
+### Requirements.txt
+
+```txt
+fastapi
+uvicorn[standard]
+```
+
+### Dockerfile
+
+```dockerfile
+FROM python:3.11-slim
+
+# Install as root first (uvicorn → global PATH)
+WORKDIR /code
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Create non-root user (HF security)
+RUN useradd -m -u 1000 user
+RUN chown -R user:user /code
+USER user
+
+# Copy app
+COPY main.py .
+
+# Guardrails
+ENV APP_PORT=yourport
+EXPOSE yourport
+
+# Run API
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "yourport"]
+```
+
+### main.py
+
+```python
+from fastapi import FastAPI
+app = FastAPI()
+
+@app.get("/")
+def read_root(): return {"message": "Deployment-ready GA2 observability API"}
+```
+
+3) Add Space Secret  
+Settings → Repository secrets → New secret
+
+Wait for the build and then submit the url.
+
+---
+
 ## 12) Host a file on GitHub Gist
 
 Directly add your email in the description.
