@@ -183,7 +183,7 @@ Apply filters:
 **Formula:**
 
 ```excel
-=SUBTOTAL(9,N2:N1000)
+=SUBTOTAL(9,T2:T651)
 ```
 
 **Purpose:**
