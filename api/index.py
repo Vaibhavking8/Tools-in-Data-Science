@@ -5,7 +5,11 @@ from typing import Literal
 from openai import OpenAI
 import json
 import numpy as np
-import os
+import subprocess, os, time, tempfile
+from google import genai  # pip install google-genai
+import yt_dlp
+import mimetypes
+
 
 # ---------------------------
 # Vercel-compatible FastAPI app
@@ -114,6 +118,147 @@ async def analyze_comment(request: CommentRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+
+# ------------------------------------
+# Audio Processing - Timestamp Finder
+# ------------------------------------
+
+def download_audio(url: str) -> str:
+    tmp_dir = tempfile.mkdtemp()
+    out_path = os.path.join(tmp_dir, "audio.%(ext)s")
+
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": out_path,
+        "quiet": True,
+        "postprocessors": [{
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
+        }],
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    # find the mp3 file
+    for f in os.listdir(tmp_dir):
+        if f.endswith(".mp3"):
+            return os.path.join(tmp_dir, f)
+    raise FileNotFoundError("Audio file not found after download")
+
+# Initialize Gemini client (requires GOOGLE_API_KEY)
+client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
+class AskRequest(BaseModel):
+    video_url: str
+    topic: str
+
+class AskResponse(BaseModel):
+    timestamp: str  # HH:MM:SS
+    video_url: str
+    topic: str
+
+@app.post("/ask", response_model=AskResponse)
+async def ask(request: AskRequest):
+    # Step 1: Download audio only
+    tmp_dir = tempfile.mkdtemp()
+    out_path = os.path.join(tmp_dir, "audio.%(ext)s")
+
+    try:
+        cmd = [
+            "yt-dlp",
+            "-x",
+            "--audio-format", "mp3",
+            "-o", out_path,
+            request.video_url
+        ]
+        audio_file = download_audio(request.video_url)
+        if not audio_file:
+            raise HTTPException(status_code=500, detail="Audio download failed")
+
+        # Step 2: Upload to Gemini Files API
+        file_ref = client.files.upload(path=audio_file)
+
+        # Step 3: Poll until ACTIVE
+        for _ in range(20):
+            f = client.files.get(name=file_ref.name)
+            if f.state == "ACTIVE":
+                break
+            time.sleep(2)
+        else:
+            raise HTTPException(status_code=500, detail="File not activated in Gemini")
+
+        # Step 4: Ask Gemini with structured output
+        response_schema = {
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "type": "string",
+                    "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+                }
+            },
+            "required": ["timestamp"],
+            "additionalProperties": False
+        }
+
+        result = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                {
+                    "role": "user",
+                    "parts": [
+                        {
+                            "file_data": {
+                                "file_uri": f.uri,
+                                "mime_type": "audio/mpeg"
+                            }
+                        },
+                        {
+                            "text": (
+                                f"Find when the topic '{request.topic}' "
+                                f"is first mentioned in this audio. "
+                                f"Respond with JSON using the schema below."
+                            )
+                        },
+                    ],
+                }
+            ],
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": {
+                    "type": "object",
+                    "properties": {
+                        "timestamp": {
+                            "type": "string",
+                            "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+                        }
+                    },
+                    "required": ["timestamp"],
+                    "additionalProperties": False,
+                },
+            },
+        )
+
+        try:
+            data = json.loads(result.text)
+            ts = data.get("timestamp")
+        except Exception:
+            raise HTTPException(status_code=500, detail="Invalid JSON returned by Gemini")
+        return AskResponse(timestamp=ts, video_url=request.video_url, topic=request.topic)
+
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"yt-dlp failed: {e.stderr.decode()}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        # Step 6: Clean up
+        try:
+            for f in os.listdir(tmp_dir):
+                os.remove(os.path.join(tmp_dir, f))
+            os.rmdir(tmp_dir)
+        except Exception:
+            pass
 
 # ---------------------------
 # Health Check
