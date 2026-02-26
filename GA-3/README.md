@@ -4,6 +4,102 @@ This README contains the **full, question-wise solutions for all 18 problems** f
 
 ---
 
+## 2) LLM Structured Output - FastAPI Sentiment Analysis
+
+
+You can host multiple APIs on a single FastAPI app deployed via **Vercel**:
+
+* `POST /` — Returns regional latency metrics from `q-vercel-latency.json`
+* `POST /comment` — Performs sentiment analysis using **GPT-4.1-mini** via **AIPipe**
+* `GET /health` — Health check endpoint
+
+---
+
+### 🚀 Deployment Steps
+
+1. **Project structure**
+
+   ```
+   api/index.py
+   q-vercel-latency.json
+   requirements.txt
+   vercel.json
+   ```
+
+2. **vercel.json**
+
+   ```json
+   {
+     "builds": [{ "src": "api/index.py", "use": "@vercel/python" }],
+     "routes": [{ "src": "/(.*)", "dest": "/api/index.py" }]
+   }
+   ```
+
+3. **requirements.txt**
+
+   ```
+   fastapi
+   numpy
+   openai>=1.12.0
+   pydantic
+   ```
+
+4. **Add Environment Variable in Vercel**
+
+   ```
+   AIPIPE_TOKEN = your_aipipe_token_here
+   ```
+
+5. **Deploy**
+
+   ```bash
+   vercel --prod
+   ```
+
+---
+
+### Testing
+
+#### Sentiment Analysis
+
+```bash
+curl -X POST https://<your-app>.vercel.app/comment \
+     -H "Content-Type: application/json" \
+     -d '{"comment": "This product is amazing!"}'
+```
+
+Expected:
+
+```json
+{ "sentiment": "positive", "rating": 5 }
+```
+
+#### Telemetry
+
+```bash
+curl -X POST https://<your-app>.vercel.app/ \
+     -H "Content-Type: application/json" \
+     -d '{"regions": ["apac", "emea"], "threshold_ms": 180}'
+```
+
+#### Health Check
+
+```bash
+curl https://<your-app>.vercel.app/health
+```
+
+---
+
+✅ **Single global URL**
+All endpoints are accessible under:
+
+```
+https://<your-app>.vercel.app/
+```
+
+
+---
+
 ## 14) Sum table values with Playwright
 
 ### Setup
