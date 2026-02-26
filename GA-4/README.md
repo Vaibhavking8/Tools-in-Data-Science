@@ -18,6 +18,14 @@ Replace this part `k == 'metric_2455'` with your own metric.
 
 ---
 
+## 16) Cross-Lingual Entity Disambiguation
+
+Open in vs-code and tell copilot to perform the task in README.md
+
+> You can try and use disambiguate.py
+
+---
+
 ## Final Note
 
 This README is a **complete, question-wise, single-file submission** of all 20 problems and their corresponding commands, code, and outputs, exactly as required.
