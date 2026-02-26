@@ -123,6 +123,12 @@ async def analyze_comment(request: CommentRequest):
 # Audio Processing - Timestamp Finder
 # ------------------------------------
 
+def normalize_url(url: str) -> str:
+    # Redirect known YouTube URLs to a public mirror
+    if "youtube.com" in url or "youtu.be" in url:
+        return url.replace("youtube.com", "yewtu.be")
+    return url
+    
 def download_audio(url: str) -> str:
     tmp_dir = tempfile.mkdtemp()
     out_path = os.path.join(tmp_dir, "audio.%(ext)s")
@@ -173,7 +179,8 @@ async def ask(request: AskRequest):
             "-o", out_path,
             request.video_url
         ]
-        audio_file = download_audio(request.video_url)
+        video_url = normalize_url(request.video_url)
+        audio_file = download_audio(video_url)
         if not audio_file:
             raise HTTPException(status_code=500, detail="Audio download failed")
 
@@ -190,17 +197,6 @@ async def ask(request: AskRequest):
             raise HTTPException(status_code=500, detail="File not activated in Gemini")
 
         # Step 4: Ask Gemini with structured output
-        response_schema = {
-            "type": "object",
-            "properties": {
-                "timestamp": {
-                    "type": "string",
-                    "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
-                }
-            },
-            "required": ["timestamp"],
-            "additionalProperties": False
-        }
 
         result = client.models.generate_content(
             model="gemini-2.5-flash",
