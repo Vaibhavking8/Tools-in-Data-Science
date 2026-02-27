@@ -28,11 +28,9 @@ Open in vs-code and tell copilot to perform the task in README.md
 
 ## 17) LLM Hallucination Trap Matrix
 
-Here's a concise “recipe” you can follow to build the enhanced ast_parser.py:
-
----
-
 > Run ast_parser.py
+
+Here's a concise “recipe” you can follow to build the enhanced ast_parser.py:
 
 ### 🛠 Building the AST(Abstract Syntax Tree)‑based validator
 
