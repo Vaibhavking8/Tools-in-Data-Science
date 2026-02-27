@@ -10,6 +10,12 @@ This README contains the **full, question-wise solutions for all 20 problems** f
 
 ---
 
+## 2) Excel: Z-Score Outlier Surveillance
+
+Try values from 0 to 10. (Worked for me)
+
+---
+
 ## 15) The Recursive Corrupted JSON Fixer
 
 > Refer salvage_sum.py
