@@ -13,8 +13,6 @@ You can host multiple APIs on a single FastAPI app deployed via **Vercel**:
 * `POST /comment` — Performs sentiment analysis using **GPT-4.1-mini** via **AIPipe**
 * `GET /health` — Health check endpoint
 
----
-
 ### 🚀 Deployment Steps
 
 1. **Project structure**
@@ -56,8 +54,6 @@ You can host multiple APIs on a single FastAPI app deployed via **Vercel**:
    vercel --prod
    ```
 
----
-
 ### Testing
 
 #### Sentiment Analysis
@@ -88,13 +84,81 @@ curl -X POST https://<your-app>.vercel.app/ \
 curl https://<your-app>.vercel.app/health
 ```
 
----
-
 ✅ **Single global URL**
 All endpoints are accessible under:
 
 ```
 https://<your-app>.vercel.app/
+```
+
+
+---
+
+## 3) Code Interpreter with AI Error Analysis
+
+> Refer api/index.py
+
+### Features
+
+* Execute Python code and capture stdout/stderr.
+* Invoke AI only on errors to identify error lines.
+* Structured JSON output using Pydantic.
+* CORS enabled for testing.
+* Supports Gemini via AIPipe token.
+
+### API Endpoint
+
+**POST /code-interpreter**
+
+### Request
+
+```json
+{
+  "code": "x = 10\ny = 0\nresult = x / y"
+}
+```
+
+### Response (Error Example)
+
+```json
+{
+  "error": [3],
+  "result": "Traceback (most recent call last):\n  File \"<string>\", line 3, in <module>\nZeroDivisionError: division by zero\n"
+}
+```
+
+### Response (Successful Code)
+
+```json
+{
+  "error": [],
+  "result": "15\n"
+}
+```
+
+## Usage Example (Windows CMD)
+
+### Successful Code
+
+```cmd
+curl -X POST http://127.0.0.1:8000/code-interpreter -H "Content-Type: application/json" -d "{\"code\":\"x = 5\ny = 10\nprint(x + y)\"}"
+```
+
+### Code with Error
+
+```cmd
+curl -X POST http://127.0.0.1:8000/code-interpreter -H "Content-Type: application/json" -d "{\"code\":\"x = 10\ny = 0\nresult = x / y\"}"
+```
+
+## Notes
+
+* Ensure `AIPIPE_TOKEN` is set in your environment before starting the server.
+* AI output may include backticks; the server strips them to parse JSON correctly.
+* The tool function preserves exact stdout and traceback output.
+* FastAPI server can be run with:
+
+```cmd
+uvicorn main:app --reload
 ```
 
 
