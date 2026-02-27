@@ -9,7 +9,10 @@ import subprocess, os, time, tempfile
 from google import genai  # pip install google-genai
 import yt_dlp
 import mimetypes
-
+import sys
+from io import StringIO
+import traceback
+import requests
 
 # ---------------------------
 # Vercel-compatible FastAPI app
@@ -255,6 +258,105 @@ async def ask(request: AskRequest):
             os.rmdir(tmp_dir)
         except Exception:
             pass
+
+# -----------------
+# Code Interpreter
+# -----------------
+
+# --- Tool Function: Execute Python Code ---
+def execute_python_code(code: str) -> dict:
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+
+    try:
+        exec(code)
+        output = sys.stdout.getvalue()
+        return {"success": True, "output": output}
+    except Exception:
+        output = traceback.format_exc()
+        return {"success": False, "output": output}
+    finally:
+        sys.stdout = old_stdout
+
+# --- AI Error Analysis using AIPipe ---
+class ErrorAnalysis(BaseModel):
+    error_lines: List[int]
+
+def analyze_error_with_ai(code: str, traceback_str: str) -> List[int]:
+    """
+    Use Gemini via AIPipe to identify error line numbers.
+    """
+    aipipe_token = os.environ.get("AIPIPE_TOKEN")
+    if not aipipe_token:
+        raise ValueError("AIPIPE_TOKEN environment variable not set")
+
+    url = "https://aipipe.org/geminiv1beta/models/gemini-2.5-flash-lite:generateContent"
+
+    # Prompt for AI
+    prompt = f"""
+Analyze this Python code and its error traceback.
+Identify the line number(s) where the error occurred.
+
+CODE:
+{code}
+
+TRACEBACK:
+{traceback_str}
+
+Return only JSON like:
+{{"error_lines": [line_numbers]}}
+"""
+
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}]
+    }
+
+    headers = {
+        "x-goog-api-key": aipipe_token,
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    data = response.json()
+    print("AI response:", data)
+
+    # Extract text from response
+    ai_text = data["candidates"][0]["content"]["parts"][0]["text"]
+    # Strip ```json ... ``` if present
+    ai_text = ai_text.strip()
+    if ai_text.startswith("```"):
+        ai_text = ai_text.split("\n", 1)[1]  # remove first line ```
+    if ai_text.endswith("```"):
+        ai_text = ai_text.rsplit("\n", 1)[0]  # remove last line ```
+    print("Extracted text:", ai_text)
+    try:
+        result = ErrorAnalysis.model_validate_json(ai_text)
+        return result.error_lines
+    except Exception:
+        # Fallback: return empty list if AI response malformed
+        return []
+
+# --- Request/Response Models ---
+class CodeRequest(BaseModel):
+    code: str
+
+class CodeResponse(BaseModel):
+    error: List[int]
+    result: str
+
+# --- Endpoint ---
+@app.post("/code-interpreter", response_model=CodeResponse)
+async def code_interpreter(request: CodeRequest):
+    execution_result = execute_python_code(request.code)
+    print("Execution result:", execution_result)
+    if execution_result["success"]:
+        return {"error": [], "result": execution_result["output"]}
+
+    print("Executing AI error analysis...")
+    error_lines = analyze_error_with_ai(request.code, execution_result["output"])
+    print("AI returned lines:", error_lines)
+    return {"error": error_lines, "result": execution_result["output"]}
 
 # ---------------------------
 # Health Check
