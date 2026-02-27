@@ -77,7 +77,7 @@ class SentimentResponse(BaseModel):
 
 # Configure AIPipe base URL and token
 os.environ["OPENAI_BASE_URL"] = "https://aipipe.org/openai/v1/"
-client = OpenAI(api_key=os.getenv("AIPIPE_TOKEN"))
+openai_client = OpenAI(api_key=os.getenv("AIPIPE_TOKEN"))
 
 @app.post("/comment", response_model=SentimentResponse)
 async def analyze_comment(request: CommentRequest):
@@ -102,7 +102,7 @@ async def analyze_comment(request: CommentRequest):
             }
         }
 
-        completion = client.chat.completions.create(
+        completion = openai_client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
                 {"role": "system", "content": "You are a sentiment analysis model."},
@@ -154,7 +154,7 @@ def download_audio(url: str) -> str:
     raise FileNotFoundError("Audio file not found after download")
 
 # Initialize Gemini client (requires GOOGLE_API_KEY)
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+gemini_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 class AskRequest(BaseModel):
     video_url: str
@@ -185,7 +185,7 @@ async def ask(request: AskRequest):
             raise HTTPException(status_code=500, detail="Audio download failed")
 
         # Step 2: Upload to Gemini Files API
-        file_ref = client.files.upload(path=audio_file)
+        file_ref = gemini_client.files.upload(path=audio_file)
 
         # Step 3: Poll until ACTIVE
         for _ in range(20):
