@@ -12,7 +12,31 @@ This README contains the **full, question-wise solutions for all 20 problems** f
 
 ## 2) Excel: Z-Score Outlier Surveillance
 
-Try values from 0 to 10. (Worked for me)
+### Count Clinics with |z-score| ≥ 2.5 (Excel)
+
+1. **Compute Mean & Std Dev**  
+Place anywhere eg: E1 and E2
+   ```excel
+   =AVERAGE(B2:B1001)
+   =STDEV.P(B2:B1001)
+   ```
+
+3. **Calculate z-score (C2)**
+
+   ```excel
+   =STANDARDIZE(B2, $E$1, $E$2)
+   ```
+
+   Fill down.
+
+4. **Count outliers using COUNTIFS**
+
+   ```excel
+   =COUNTIFS(C2:C1001, ">=2.5") + COUNTIFS(C2:C1001, "<=-2.5")
+   ```
+
+➡️ Result = number of clinics requiring executive attention.
+
 
 ---
 
