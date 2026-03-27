@@ -32,3 +32,13 @@ Follow the steps mentioned there to successfully get your PR merged.
 > commonmark_parser.py
 
 ---
+## 9) Network Game: Data Labyrinth
+## 10) Network Game: Graph Detective
+## 11) Network Game: The Signal
+
+For all three questions 9, 10, and 11 try this crazy solution:
+[https://tds-games-solver.vercel.app/](https://tds-games-solver.vercel.app/)
+
+Credits: [HypeMonk](https://github.com/HypeMonk)
+
+---
